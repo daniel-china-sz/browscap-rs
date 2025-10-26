@@ -1,0 +1,96 @@
+use crate::{
+    AOL_VERSION, BROWSER, BROWSER_BITS, BROWSER_MAJOR_VERSION, BROWSER_MAKER,
+    BROWSER_MINOR_VERSION, BROWSER_MODUS, BROWSER_TYPE, BROWSER_VERSION, BrowsCapField, COMMENT,
+    CSS_VERSION, DEVICE_BRAND_NAME, DEVICE_CODE_NAME, DEVICE_MAKER, DEVICE_NAME,
+    DEVICE_POINTING_METHOD, DEVICE_TYPE, IS_ACTIVEX_CONTROLS, IS_ALPHA, IS_ANONYMIZED,
+    IS_BACKGROUND_SOUNDS, IS_BETA, IS_COOKIES, IS_CRAWLER, IS_FAKE, IS_FRAMES, IS_IFRAMES,
+    IS_JAVA_APPLETS, IS_JAVASCRIPT, IS_LITE_MODE, IS_MASTER_PARENT, IS_MOBILE_DEVICE, IS_MODIFIED,
+    IS_SYNDICATION_READER, IS_TABLES, IS_TABLET, IS_VBSCRIPT, IS_WIN16, IS_WIN32, IS_WIN64, PARENT,
+    PLATFORM, PLATFORM_BITS, PLATFORM_DESCRIPTION, PLATFORM_MAKER, PLATFORM_VERSION,
+    RENDERING_ENGINE_DESCRIPTION, RENDERING_ENGINE_MAKER, RENDERING_ENGINE_NAME,
+    RENDERING_ENGINE_VERSION,
+};
+
+impl BrowsCapField {
+    pub(crate) const fn new(name: &'static str, is_default: bool, ordinal: usize) -> Self {
+        Self {
+            name,
+            is_default,
+            ordinal,
+        }
+    }
+
+    pub fn ordinal(&self) -> usize {
+        self.ordinal
+    }
+
+    pub fn index(&self) -> usize {
+        self.ordinal + 1
+    }
+
+    pub fn is_default(&self) -> bool {
+        self.is_default
+    }
+
+    pub fn values() -> &'static [BrowsCapField] {
+        &VALUES
+    }
+
+    pub fn name(&self) -> &'static str {
+        self.name
+    }
+}
+
+// VALUES 数组
+pub const VALUES: [BrowsCapField; 50] = [
+    IS_MASTER_PARENT,
+    IS_LITE_MODE,
+    PARENT,
+    COMMENT,
+    BROWSER,
+    BROWSER_TYPE,
+    BROWSER_BITS,
+    BROWSER_MAKER,
+    BROWSER_MODUS,
+    BROWSER_VERSION,
+    BROWSER_MAJOR_VERSION,
+    BROWSER_MINOR_VERSION,
+    PLATFORM,
+    PLATFORM_VERSION,
+    PLATFORM_DESCRIPTION,
+    PLATFORM_BITS,
+    PLATFORM_MAKER,
+    IS_ALPHA,
+    IS_BETA,
+    IS_WIN16,
+    IS_WIN32,
+    IS_WIN64,
+    IS_IFRAMES,
+    IS_FRAMES,
+    IS_TABLES,
+    IS_COOKIES,
+    IS_BACKGROUND_SOUNDS,
+    IS_JAVASCRIPT,
+    IS_VBSCRIPT,
+    IS_JAVA_APPLETS,
+    IS_ACTIVEX_CONTROLS,
+    IS_MOBILE_DEVICE,
+    IS_TABLET,
+    IS_SYNDICATION_READER,
+    IS_CRAWLER,
+    IS_FAKE,
+    IS_ANONYMIZED,
+    IS_MODIFIED,
+    CSS_VERSION,
+    AOL_VERSION,
+    DEVICE_NAME,
+    DEVICE_MAKER,
+    DEVICE_TYPE,
+    DEVICE_POINTING_METHOD,
+    DEVICE_CODE_NAME,
+    DEVICE_BRAND_NAME,
+    RENDERING_ENGINE_NAME,
+    RENDERING_ENGINE_VERSION,
+    RENDERING_ENGINE_DESCRIPTION,
+    RENDERING_ENGINE_MAKER,
+];
