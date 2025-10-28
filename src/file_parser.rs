@@ -1,5 +1,6 @@
 use crate::capabilities::CapaCache;
 use crate::error::ParseError;
+use crate::literal::LITERAL_CACHE;
 use crate::rule::Rule;
 use crate::{ BrowsCapField, UserAgentParser, capabilities};
 use csv::{ReaderBuilder, StringRecord};
@@ -41,6 +42,7 @@ impl FileParser {
         }
         self.rules.push(crate::rule::get_wild_card_rule(&self.fields));
         self.rules.shrink_to_fit();
+        LITERAL_CACHE.clear();
     }
 
     pub fn get_rule(&self, record: StringRecord) -> Result<Rule, ParseError> {

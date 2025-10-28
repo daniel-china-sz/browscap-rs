@@ -161,17 +161,17 @@ impl Rule {
     }
 
     pub fn requires(&self, value: Ustr) -> bool {
-        // 检查前缀和后缀
-        if Self::requires_single(&self.my_prefix, value)
-            || Self::requires_single(&self.my_postfix, value)
-        {
+        if self.my_prefix.as_ref().map_or(false, |item|item.requires(value)) {
+            return true;
+        }
+        if self.my_postfix.as_ref().map_or(false, |item|item.requires(value)) {
             return true;
         }
 
         // 检查后缀列表
         if let Some(suffixes) = &self.my_suffixes {
             for suffix in suffixes {
-                if Self::requires_single(&Some(suffix.clone()), value) {
+                if suffix.requires(value) {
                     return true;
                 }
             }
@@ -180,13 +180,6 @@ impl Rule {
         false
     }
 
-    fn requires_single(literal: &Option<Arc<Literal>>, value: Ustr) -> bool {
-        if let Some(lit) = literal {
-            lit.requires(value)
-        } else {
-            false
-        }
-    }
 }
 
 pub fn create_rule(pattern: String, capabilities: Arc<Capabilities>) -> Result<Rule, ParseError> {
