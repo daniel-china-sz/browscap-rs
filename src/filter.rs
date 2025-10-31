@@ -4,7 +4,6 @@ use crate::searchable_string::{self, SearchableString};
 use bitvec::prelude::BitVec;
 use std::fmt::Debug;
 use std::ops::Not;
-use ustr::Ustr;
 
 #[derive(Debug)]
 pub enum FilterType {
@@ -32,12 +31,12 @@ impl Filter {
     用长度为rule个数的bitvec，用每一个位保存当前prefix与所有逐个rule的prefix比较“起始于”的真假结果
     方法结果是返回一个记录prefix filter的bitvec数据，记录着与每个rule的前缀匹配情况
 */
-pub(crate) fn create_prefix_masker(rules: &Vec<Rule>, pattern: Ustr) -> BitVec {
+pub(crate) fn create_prefix_masker(rules: &Vec<Rule>, pattern: &str) -> BitVec {
     let mut my_mask = BitVec::new();
     my_mask.resize(rules.len(), false);
     for (i, rule) in rules.iter().enumerate() {
         let r = match rule.get_prefix() {
-            Some(prefix) => prefix.get_string().starts_with(pattern.as_str()),
+            Some(prefix) => prefix.get_string().starts_with(pattern),
             None => false,
         };
         if r {
@@ -47,7 +46,7 @@ pub(crate) fn create_prefix_masker(rules: &Vec<Rule>, pattern: Ustr) -> BitVec {
     my_mask
 }
 
-pub fn create_contains_masker(rules: &Vec<Rule>, pattern: Ustr) -> BitVec {
+pub fn create_contains_masker(rules: &Vec<Rule>, pattern: &str) -> BitVec {
     let mut my_mask = BitVec::new();
     my_mask.resize(rules.len(), false);
     for (i, rule) in rules.iter().enumerate() {

@@ -1,13 +1,11 @@
 use crate::capabilities::CapaCache;
 use crate::error::ParseError;
-use crate::literal::LITERAL_CACHE;
+use crate::literal::{LITERAL_CACHE, pool_str};
 use crate::rule::Rule;
 use crate::{ BrowsCapField, UserAgentParser, capabilities};
 use csv::{ReaderBuilder, StringRecord};
 use hashbrown::HashSet;
 use std::io;
-use std::rc::Rc;
-use ustr::Ustr;
 
 pub struct FileParser {
     fields: Vec<&'static BrowsCapField>,
@@ -69,20 +67,20 @@ pub fn create_agent_parser(file_parser: FileParser) -> UserAgentParser {
 fn get_brows_cap_fields<'b>(
     record: &StringRecord,
     fields: &Vec<&'static BrowsCapField>,
-) -> Vec<Ustr> {
-    let mut values: Vec<Ustr> = Vec::new();
+) -> Vec<&'static str> {
+    let mut values: Vec<&'static str> = Vec::new();
     for field in fields.iter() {
         let value = record.get(field.index());
         if value.is_none() {
-            values.push(Ustr::from(capabilities::UNKNOWN_BROWSCAP_VALUE));
+            values.push(capabilities::UNKNOWN_BROWSCAP_VALUE);
             continue;
         }
-        let trimmed = Rc::new(value.unwrap().trim().to_string());
+        let trimmed = value.unwrap().trim();
         if trimmed.is_empty() {
-            values.push(Ustr::from(capabilities::UNKNOWN_BROWSCAP_VALUE));
+            values.push(capabilities::UNKNOWN_BROWSCAP_VALUE);
             continue;
         }
-        values.push(Ustr::from(&trimmed));
+        values.push(pool_str(trimmed));
     }
     values
 }

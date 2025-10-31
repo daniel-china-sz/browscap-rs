@@ -7,7 +7,6 @@ use hashbrown::HashSet;
 use std::cell::{RefCell};
 use std::hash::Hash;
 use std::sync::{Arc, OnceLock};
-use ustr::Ustr;
 
 pub const UNKNOWN_BROWSCAP_VALUE: &'static str = "Unknown";
 
@@ -31,7 +30,7 @@ impl CapaCache {
 }
 
 impl Capabilities {
-    fn new(values: Vec<Ustr>) -> Capabilities {
+    fn new(values: Vec<&'static str>) -> Capabilities {
         Capabilities { my_values: values }
     }
     pub fn get_value(&self, field: &BrowsCapField) -> Option<&str> {
@@ -41,7 +40,7 @@ impl Capabilities {
             .read()
             .unwrap()
             .get_value(&self.my_values, field);
-        return u_str.map(|x| x.as_str());
+        return u_str;
     }
 
     pub fn get_browser(&self) -> Option<&str> {
@@ -86,9 +85,9 @@ impl PartialEq for Capabilities {
 
 pub fn init_default_capa<'a>(fields: &Vec<&'static BrowsCapField>) -> &'a Capabilities {
     DEFAULT_CAPABILITIES.get_or_init(|| {
-        let mut result: Vec<Ustr> = Vec::new();
+        let mut result: Vec<&'static str> = Vec::new();
         for _i in 0..fields.len() {
-            result.push(Ustr::from(capabilities::UNKNOWN_BROWSCAP_VALUE));
+            result.push(capabilities::UNKNOWN_BROWSCAP_VALUE);
         }
         Capabilities::new(result)
     })
@@ -97,7 +96,7 @@ pub fn init_default_capa<'a>(fields: &Vec<&'static BrowsCapField>) -> &'a Capabi
 /**
  * 缓存capabilities
  */
-pub fn get_capabilities(values: Vec<Ustr>, capa_cache: &CapaCache) -> Arc<Capabilities> {
+pub fn get_capabilities(values: Vec<&'static str>, capa_cache: &CapaCache) -> Arc<Capabilities> {
     let capabilities: Capabilities = Capabilities::new(values);
     capa_cache.get_or_insert(capabilities)
 }
@@ -109,11 +108,11 @@ pub fn init_wild_card_capa<'a>(fields: &'a Vec<&'static BrowsCapField>) -> Arc<C
         let position_field = mapper.position_field(index);
         if let Some(field) = position_field {
             if *field == BROWSER || *field == BROWSER_TYPE {
-                *item = Ustr::from("Default Browser");
+                *item = "Default Browser";
                 continue;
             }
             if field.is_default {
-                *item = Ustr::from(capabilities::UNKNOWN_BROWSCAP_VALUE);
+                *item = capabilities::UNKNOWN_BROWSCAP_VALUE;
             }
         }
     }

@@ -1,16 +1,24 @@
 use crate::searchable_string::SearchableString;
-use std::fmt::{Debug};
+use dashmap::DashMap;
+use hashbrown::HashSet;
+use std::fmt::Debug;
 use std::sync::atomic::{AtomicIsize, Ordering};
 use std::sync::{Arc, LazyLock};
-use dashmap::DashMap;
-use ustr::Ustr;
 
 pub static MY_NR_OF_INSTANCES: AtomicIsize = AtomicIsize::new(0);
 
-pub static LITERAL_CACHE: LazyLock<DashMap<Ustr, Arc<Literal>>> = LazyLock::new(|| DashMap::new());
+pub static LITERAL_CACHE: LazyLock<DashMap<&str, Arc<Literal>>> = LazyLock::new(|| DashMap::new());
+pub static STR_POOL: LazyLock<HashSet<&'static str>> = LazyLock::new(|| HashSet::new());
+
+pub fn pool_str(str: &str) -> &'static str {
+    match STR_POOL.get(str) {
+        Some(i) => i,
+        None => Box::leak(str.to_string().into_boxed_str()),
+    }
+}
 
 pub struct Literal {
-    pub(crate) my_string: Ustr,
+    pub(crate) my_string: &'static str,
     pub(crate) my_index: usize,
 }
 pub fn get_searchable_string(contents: String) -> SearchableString {
@@ -29,7 +37,7 @@ impl Debug for Literal {
 }
 
 impl Literal {
-    pub fn create_literal(contents: Ustr) -> Literal {
+    pub fn create_literal(contents: &'static str) -> Literal {
         Literal {
             my_string: contents,
             my_index: MY_NR_OF_INSTANCES.fetch_add(1, Ordering::SeqCst) as usize,
@@ -67,26 +75,29 @@ impl Literal {
     }
 
     //Checks whether the my_string contains the value.
-    pub fn requires(&self, value: Ustr) -> bool {
+    pub fn requires(&self, value: &str) -> bool {
         let len = value.len();
         if len > self.my_string.len() {
             return false;
         }
-        self.my_string.contains(value.as_str())
+        self.my_string.contains(value)
     }
 
-    pub fn get_string(&self) -> Ustr {
+    pub fn get_string(&self) -> &str {
         self.my_string
     }
 }
 
-
 pub fn get_literal(value: &str) -> Arc<Literal> {
-    let value = Ustr::from(value);
-    LITERAL_CACHE
-        .entry(value)
-        .or_insert_with(|| Arc::new(Literal::create_literal(value)))
-        .clone()
+    match LITERAL_CACHE.get(value) {
+        Some(entry) => entry.value().clone(),
+        None => {
+            let key = pool_str(value);
+            let literal = Arc::new(Literal::create_literal(key));
+            LITERAL_CACHE.insert(key, literal.clone());
+            literal
+        }
+    }
 }
 
 #[cfg(test)]
@@ -96,17 +107,17 @@ mod test_literal {
     #[test]
     fn test_literal_basic() {
         let str = "abcdef";
-        let literal = Literal::create_literal(Ustr::from(str));
+        let literal = Literal::create_literal(str);
         assert_eq!(str.len(), literal.get_length());
         assert_eq!('a', literal.get_first_char());
         assert_eq!(literal.get_string(), literal.get_string());
-        let literal2 = Literal::create_literal(Ustr::from("di"));
+        let literal2 = Literal::create_literal("di");
         assert_eq!(literal2.get_index(), 1)
     }
 
     #[test]
     fn test_literal_matches() {
-        let literal = Literal::create_literal(Ustr::from("def"));
+        let literal = Literal::create_literal("def");
         let search: Vec<char> = "abcdef".chars().collect();
         assert_eq!(literal.matches(&search, 3), true);
         assert_eq!(literal.matches(&search, 0), false);
@@ -114,7 +125,7 @@ mod test_literal {
         //assert_eq!(literal.matches(&search, -10), true);
         assert_eq!(literal.matches(&search, 100), false);
 
-        let joker = Literal::create_literal("d?f".parse().unwrap());
+        let joker = Literal::create_literal("d?f");
         assert_eq!(joker.matches(&search, 3), true);
         assert_eq!(joker.matches(&search, 0), false);
         assert_eq!(joker.matches(&search, 5), false);
@@ -122,11 +133,11 @@ mod test_literal {
 
     #[test]
     fn test_literal_requires() {
-        let literal = Literal::create_literal(Ustr::from("hello"));
-        assert_eq!(literal.requires(Ustr::from("hello")), true);
-        assert_eq!(literal.requires(Ustr::from("hell")), true);
-        assert_eq!(literal.requires(Ustr::from("hello world")), false);
-        assert_eq!(literal.requires(Ustr::from("morning world")), false);
-        assert_eq!(literal.requires(Ustr::from("helloworld")), false);
+        let literal = Literal::create_literal("hello");
+        assert_eq!(literal.requires("hello"), true);
+        assert_eq!(literal.requires("hell"), true);
+        assert_eq!(literal.requires("hello world"), false);
+        assert_eq!(literal.requires("morning world"), false);
+        assert_eq!(literal.requires("helloworld"), false);
     }
 }

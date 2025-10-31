@@ -5,7 +5,6 @@ use crate::rule::Rule;
 use std::fs::File;
 use std::io::BufReader;
 use hashbrown::HashSet;
-use ustr::Ustr;
 
 mod brows_cap_field;
 mod capabilities;
@@ -95,7 +94,7 @@ pub struct BrowsCapField {
 
 #[derive(Debug)]
 pub struct Capabilities {
-    my_values: Vec<Ustr>,
+    my_values: Vec<&'static str>,
 }
 
 #[derive(Debug)]

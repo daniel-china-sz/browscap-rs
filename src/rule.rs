@@ -6,7 +6,6 @@ use crate::{BrowsCapField, Capabilities, searchable_string};
 use regex::Regex;
 use std::fmt::Debug;
 use std::sync::Arc;
-use ustr::Ustr;
 
 pub struct Rule {
     my_prefix: Option<Arc<Literal>>,
@@ -160,7 +159,7 @@ impl Rule {
         &self.my_capabilities
     }
 
-    pub fn requires(&self, value: Ustr) -> bool {
+    pub fn requires(&self, value: &str) -> bool {
         if self.my_prefix.as_ref().map_or(false, |item|item.requires(value)) {
             return true;
         }

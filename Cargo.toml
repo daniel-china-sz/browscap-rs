@@ -19,9 +19,9 @@ bitvec = "1.0.1"
 regex = "1.11.3"
 log = "0.4.28"
 env_logger = "0.9.1"
-ustr = "1.1.0"
 dashmap = "6.1.0"
 hashbrown = "0.16.0"
 
 [dev-dependencies]
 base64 = "0.22.1"
+memchr = "2.7.6"

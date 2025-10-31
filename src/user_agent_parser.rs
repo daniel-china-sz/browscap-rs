@@ -4,7 +4,6 @@ use crate::rule::Rule;
 use crate::{Capabilities, UserAgentParser, literal};
 use log::debug;
 use std::time::Instant;
-use ustr::Ustr;
 
 pub const COMMON: [&str; 75] = [
     "-",
@@ -120,14 +119,12 @@ fn build_filters(my_rules: &Vec<Rule>) -> Vec<Filter> {
     let mut result = Vec::new();
 
     for pattern in FILTER_PREFIXES {
-        let pattern = Ustr::from(pattern);
         let literal = Literal::create_literal(pattern);
         let mask = filter::create_prefix_masker(my_rules, pattern);
         result.push(Filter::new(FilterType::Prefix(literal), mask));
     }
     // Build filters for specific contains constraints
     for common in COMMON {
-        let common = Ustr::from(common);
         let literal = Literal::create_literal(common);
         let mask = filter::create_contains_masker(my_rules, common);
         result.push(Filter::new(FilterType::Contains(literal), mask));

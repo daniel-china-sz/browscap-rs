@@ -156,12 +156,11 @@ fn bitset_set(bitset: &mut BitVec, index: usize, value: bool) {
 #[cfg(test)]
 mod test_searchable_string {
     use super::*;
-    use ustr::Ustr;
 
     #[test]
     fn test_base() {
-        let abc = Literal::create_literal(Ustr::from("abc"));
-        let ab = Literal::create_literal(Ustr::from("ab"));
+        let abc = Literal::create_literal("abc");
+        let ab = Literal::create_literal("ab");
         let string_value = "abababc".to_string();
         let mut cache = SearchableString::new(string_value, 0);
         assert_eq!(starts_with(&mut cache, &ab), true);
@@ -177,10 +176,10 @@ mod test_searchable_string {
 
     #[test]
     fn test_get_indices() {
-        let abc = Literal::create_literal(Ustr::from("abc"));
-        let ab = Literal::create_literal(Ustr::from("ab"));
-        let any_char = Literal::create_literal(Ustr::from("?ab"));
-        let no_match = Literal::create_literal(Ustr::from("aaaaaaaaaaaaaaaaaa"));
+        let abc = Literal::create_literal("abc");
+        let ab = Literal::create_literal("ab");
+        let any_char = Literal::create_literal("?ab");
+        let no_match = Literal::create_literal("aaaaaaaaaaaaaaaaaa");
 
         let mut cache = SearchableString::new("abababc".to_string(), no_match.my_index + 1);
         assert_eq!(vec![4; 1], *cache.get_indices(&abc));
@@ -194,10 +193,10 @@ mod test_searchable_string {
 
     #[test]
     fn test_get_buffer() {
-        let abc = Literal::create_literal(Ustr::from("abc"));
-        let ab = Literal::create_literal(Ustr::from("ab"));
-        let any_char = Literal::create_literal(Ustr::from("?ab"));
-        let no_match = Literal::create_literal(Ustr::from("aaaaaaaaaaaaaaaaaa"));
+        let abc = Literal::create_literal("abc");
+        let ab = Literal::create_literal("ab");
+        let any_char = Literal::create_literal("?ab");
+        let no_match = Literal::create_literal("aaaaaaaaaaaaaaaaaa");
 
         let mut cache = SearchableString::new("abababc".to_string(), no_match.my_index + 1);
         println!("{:?}", cache.find_indices(&abc));

@@ -2,7 +2,6 @@ use crate::BrowsCapField;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, OnceLock, RwLock};
-use ustr::Ustr;
 
 pub static MAPPER: OnceLock<Arc<RwLock<Mapper>>> = OnceLock::new();
 
@@ -29,7 +28,7 @@ impl Mapper {
         Mapper { field_index }
     }
 
-    pub fn get_value(&self, values: &Vec<Ustr>, field: &BrowsCapField) -> Option<Ustr> {
+    pub fn get_value(&self, values: &Vec<&'static str>, field: &BrowsCapField) -> Option<&'static str> {
         let index = self.field_index.get(field);
         match index {
             None => None,
